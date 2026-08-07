@@ -1,0 +1,9 @@
+{
+  "uuid": "consumeros-shell@consumeros.local",
+  "name": "ConsumerOS Shell",
+  "description": "Consumer-facing panel search and desktop integration for ConsumerOS.",
+  "shell-version": ["48"],
+  "version": 1,
+  "url": "https://consumeros.invalid"
+}
+

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Driver Manager
+Comment=Check hardware, drivers, and firmware
+Exec=consumeros-drivers
+Icon=org.consumeros.Drivers
+Terminal=false
+Type=Application
+Categories=Settings;HardwareSettings;
+Keywords=Driver;Firmware;NVIDIA;AMD;Intel;Wi-Fi;Bluetooth;
+StartupNotify=true

@@ -1,0 +1,6 @@
+consumeros (1.0.0) trixie; urgency=medium
+
+  * Initial ConsumerOS v1 system package.
+
+ -- ConsumerOS Build Team <build@consumeros.invalid>  Fri, 07 Aug 2026 00:00:00 -0500
+

@@ -1,0 +1,13 @@
+[Unit]
+Description=Confirm a healthy boot after a ConsumerOS update
+Documentation=man:consumerosctl(1)
+ConditionPathExists=!/run/live/medium
+After=graphical.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/consumerosctl update bless
+TimeoutStartSec=2min
+
+[Install]
+WantedBy=graphical.target

@@ -1,0 +1,57 @@
+Source: consumeros
+Section: admin
+Priority: optional
+Maintainer: ConsumerOS Build Team <build@consumeros.invalid>
+Build-Depends:
+ debhelper-compat (= 13),
+ dh-python,
+ pybuild-plugin-pyproject,
+ python3-all,
+ python3-pytest,
+ python3-setuptools
+Standards-Version: 4.7.2
+Rules-Requires-Root: no
+
+Package: consumeros-core
+Architecture: all
+Depends:
+ ${misc:Depends},
+ ${python3:Depends},
+ apt,
+ btrfs-progs,
+ dconf-cli,
+ flatpak,
+ fwupd,
+ gir1.2-adw-1,
+ gir1.2-gtk-4.0,
+ initramfs-tools,
+ pciutils,
+ pkexec,
+ polkitd,
+ python3-gi,
+ rsync,
+ smartmontools,
+ snapper,
+ systemd,
+ usbutils
+Recommends:
+ apparmor,
+ bolt,
+ deja-dup,
+ gnome-firmware,
+ gnome-software,
+ network-manager,
+ packagekit-tools,
+ switcheroo-control
+Suggests:
+ calamares,
+ gamemode,
+ podman,
+ steam-installer,
+ wine
+Replaces:
+ calamares-settings-debian
+Description: ConsumerOS desktop, update, recovery, and compatibility tools
+ Native graphical and command-line control plane for ConsumerOS. It provides
+ system status, transactional offline updates, hardware and firmware discovery,
+ recovery, application compatibility, migration, and optional feature profiles.

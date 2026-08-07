@@ -1,0 +1,15 @@
+.build/
+.cache/
+.pytest_cache/
+__pycache__/
+*.egg-info/
+*.py[cod]
+*.deb
+*.build
+*.buildinfo
+*.changes
+*.dsc
+*.iso
+*.log
+dist/
+htmlcov/

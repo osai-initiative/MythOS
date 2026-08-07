@@ -1,0 +1,10 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: ConsumerOS
+Source: https://consumeros.invalid/
+
+Files: *
+Copyright: 2026 ConsumerOS Build Team
+License: LicenseRef-ConsumerOS-Unlicensed
+ This source tree does not grant a public redistribution license. Choose and
+ document a project license before publishing ConsumerOS source or binary
+ images outside the organization that owns this work.
