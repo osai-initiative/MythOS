@@ -3,9 +3,9 @@ from pathlib import Path
 
 import pytest
 
-from consumeros.compat import CompatibilityDatabase
-from consumeros.models import CompatibilityRating
-from consumeros.util import ConsumerOSError
+from mythos.compat import CompatibilityDatabase
+from mythos.models import CompatibilityRating
+from mythos.util import MythOSError
 
 
 def test_lookup_matches_filename_alias(tmp_path: Path) -> None:
@@ -45,6 +45,6 @@ def test_unknown_app_stays_untested(tmp_path: Path) -> None:
 def test_rejects_unsupported_database_schema(tmp_path: Path) -> None:
     source = tmp_path / "compatibility.json"
     source.write_text('{"schema": 99, "entries": []}', encoding="utf-8")
-    with pytest.raises(ConsumerOSError):
+    with pytest.raises(MythOSError):
         CompatibilityDatabase(source)
 

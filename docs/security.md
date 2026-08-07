@@ -1,4 +1,4 @@
-# ConsumerOS v1 security model
+# MythOS v1 security model
 
 ## Defaults
 
@@ -19,7 +19,7 @@
 
 APT sources use Debian's archive keyring. Stable and Current both retain the
 Debian stable base. Update state, errors, and the bounded transaction history
-are mode `0600` under `/var/lib/consumeros`.
+are mode `0600` under `/var/lib/mythos`.
 
 Updates are downloaded before restart and installed by systemd's offline-update
 mechanism. The updater refuses its transactional path unless root is Btrfs and
@@ -51,7 +51,7 @@ warning; AppImage is not described as sandboxed.
 
 Bootloader repair accepts only explicit `/dev/...` targets, verifies the root
 filesystem type, mounts it in a private temporary path, and checks the
-ConsumerOS marker before invoking GRUB. Desktop reset backs up GNOME settings
+MythOS marker before invoking GRUB. Desktop reset backs up GNOME settings
 before resetting only the desktop-related key prefixes. Keep-files reset and
 destructive reinstall remain installer/recovery operations and must show their
 target disk before execution.

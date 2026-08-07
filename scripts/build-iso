@@ -7,9 +7,9 @@ BUILD_ROOT="${PROJECT_ROOT}/.build"
 WORK_DIR="${BUILD_ROOT}/live"
 CACHE_DIR="${BUILD_ROOT}/live-cache"
 ARTIFACT_DIR="${BUILD_ROOT}/artifacts"
-BUILDER_IMAGE="${CONSUMEROS_BUILDER_IMAGE:-consumeros-builder:trixie-v1}"
-ARCH="${CONSUMEROS_ARCH:-amd64}"
-MIRROR="${CONSUMEROS_MIRROR:-https://deb.debian.org/debian}"
+BUILDER_IMAGE="${MYTHOS_BUILDER_IMAGE:-mythos-builder:trixie-v1}"
+ARCH="${MYTHOS_ARCH:-amd64}"
+MIRROR="${MYTHOS_MIRROR:-https://deb.debian.org/debian}"
 VERSION="$(tr -d '[:space:]' < "${PROJECT_ROOT}/VERSION")"
 
 if [[ "${WORK_DIR}" != "${PROJECT_ROOT}/.build/live" ]]; then
@@ -75,30 +75,30 @@ docker run --rm --privileged \
             --mirror-bootstrap "${MIRROR}" \
             --mirror-chroot "${MIRROR}" \
             --mirror-binary "${MIRROR}" \
-            --iso-application "ConsumerOS ${VERSION}" \
-            --iso-publisher "ConsumerOS Build Team" \
-            --iso-volume "CONSUMEROS_1_0" \
-            --image-name "consumeros-${VERSION}" \
-            --bootappend-live "boot=live components quiet splash username=consumer hostname=consumeros locales=en_US.UTF-8 keyboard-layouts=us"
+            --iso-application "MythOS ${VERSION}" \
+            --iso-publisher "MythOS Build Team" \
+            --iso-volume "MYTHOS_1_0" \
+            --image-name "mythos-${VERSION}" \
+            --bootappend-live "boot=live components quiet splash username=consumer hostname=mythos locales=en_US.UTF-8 keyboard-layouts=us"
 
         # Source files arrive through a bind mount owned by the invoking user;
         # live-build preserves metadata when it copies includes into the image.
         rsync -a --chown=0:0 /src/config/ "${work}/config/"
         mkdir -p "${work}/config/packages.chroot"
-        cp "${artifacts}"/consumeros-core_*_all.deb "${work}/config/packages.chroot/"
+        cp "${artifacts}"/mythos-core_*_all.deb "${work}/config/packages.chroot/"
         chmod 0755 "${work}"/config/hooks/normal/*.hook.chroot
         lb build 2>&1 | tee "${artifacts}/iso-build.log"
 
-        iso="${work}/consumeros-${VERSION}-${ARCH}.hybrid.iso"
+        iso="${work}/mythos-${VERSION}-${ARCH}.hybrid.iso"
         if [ ! -s "${iso}" ]; then
             printf "Expected ISO was not produced: %s\n" "${iso}" >&2
             exit 3
         fi
-        install -m 0644 "${iso}" "${artifacts}/consumeros-${VERSION}-${ARCH}.iso"
+        install -m 0644 "${iso}" "${artifacts}/mythos-${VERSION}-${ARCH}.iso"
         cd "${artifacts}"
-        sha256sum "consumeros-${VERSION}-${ARCH}.iso" > "consumeros-${VERSION}-${ARCH}.iso.sha256"
+        sha256sum "mythos-${VERSION}-${ARCH}.iso" > "mythos-${VERSION}-${ARCH}.iso.sha256"
     '
 
-"${SCRIPT_DIR}/verify-image" "${ARTIFACT_DIR}/consumeros-${VERSION}-${ARCH}.iso"
+"${SCRIPT_DIR}/verify-image" "${ARTIFACT_DIR}/mythos-${VERSION}-${ARCH}.iso"
 
-printf 'ISO: %s\n' "${ARTIFACT_DIR}/consumeros-${VERSION}-${ARCH}.iso"
+printf 'ISO: %s\n' "${ARTIFACT_DIR}/mythos-${VERSION}-${ARCH}.iso"

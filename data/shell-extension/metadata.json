@@ -1,9 +1,9 @@
 {
-  "uuid": "consumeros-shell@consumeros.local",
-  "name": "ConsumerOS Shell",
-  "description": "Consumer-facing panel search and desktop integration for ConsumerOS.",
+  "uuid": "mythos-shell@mythos.local",
+  "name": "MythOS Shell",
+  "description": "Consumer-facing panel search and desktop integration for MythOS.",
   "shell-version": ["48"],
   "version": 1,
-  "url": "https://consumeros.invalid"
+  "url": "https://mythos.invalid"
 }
 

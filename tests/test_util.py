@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from consumeros.util import atomic_write, bytes_to_human, is_device_path, safe_name
+from mythos.util import atomic_write, bytes_to_human, is_device_path, safe_name
 
 
 def test_atomic_write_and_helpers(tmp_path: Path) -> None:

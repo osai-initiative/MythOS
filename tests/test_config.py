@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from consumeros.config import Config
+from mythos.config import Config
 
 
 def test_config_round_trip(tmp_path: Path) -> None:

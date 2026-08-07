@@ -9,6 +9,6 @@
     <path d="M14 51h48" fill="none" stroke="#f7f8fc" stroke-width="6" stroke-linecap="round"/>
     <circle cx="38" cy="39" r="4.5" fill="#f5b84b"/>
   </g>
-  <text x="168" y="111" fill="#f7f8fc" font-family="Noto Sans, sans-serif" font-size="39" font-weight="700">ConsumerOS</text>
+  <text x="168" y="111" fill="#f7f8fc" font-family="Noto Sans, sans-serif" font-size="39" font-weight="700">MythOS</text>
   <text x="170" y="143" fill="#b9c4d8" font-family="Noto Sans, sans-serif" font-size="17">Your computer, ready.</text>
 </svg>

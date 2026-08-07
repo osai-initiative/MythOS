@@ -4,8 +4,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 VERSION="$(tr -d '[:space:]' < "${PROJECT_ROOT}/VERSION")"
-ARCH="${CONSUMEROS_ARCH:-amd64}"
-ISO="${1:-${PROJECT_ROOT}/.build/artifacts/consumeros-${VERSION}-${ARCH}.iso}"
+ARCH="${MYTHOS_ARCH:-amd64}"
+ISO="${1:-${PROJECT_ROOT}/.build/artifacts/mythos-${VERSION}-${ARCH}.iso}"
 CHECKSUM="${ISO}.sha256"
 
 if [[ ! -s "${ISO}" ]]; then
@@ -52,7 +52,7 @@ if ! rg -q '^timeout 50$' "${inspection_dir}/isolinux.cfg"; then
     exit 3
 fi
 for menu in "${inspection_dir}/grub.cfg" "${inspection_dir}/isolinux-live.cfg"; do
-    for choice in 'Try ConsumerOS' 'Install ConsumerOS' 'Repair an existing installation'; do
+    for choice in 'Try MythOS' 'Install MythOS' 'Repair an existing installation'; do
         if ! rg -F -q "${choice}" "${menu}"; then
             printf 'Boot menu is missing choice: %s\n' "${choice}" >&2
             exit 3
@@ -60,7 +60,7 @@ for menu in "${inspection_dir}/grub.cfg" "${inspection_dir}/isolinux-live.cfg"; 
     done
 done
 
-for package in consumeros-core gnome-core calamares flatpak snapper; do
+for package in mythos-core gnome-core calamares flatpak snapper; do
     if ! rg -q "^${package}[[:space:]]" "${inspection_dir}/filesystem.packages"; then
         printf 'Required image package is absent: %s\n' "${package}" >&2
         exit 4
@@ -69,12 +69,12 @@ done
 
 unsquashfs -ll "${inspection_dir}/filesystem.squashfs" > "${inspection_dir}/squashfs.txt"
 for path in \
-    squashfs-root/usr/bin/consumeros \
-    squashfs-root/usr/bin/consumerosctl \
-    squashfs-root/usr/share/applications/org.consumeros.SystemHub.desktop \
-    squashfs-root/usr/share/gnome-shell/extensions/consumeros-shell@consumeros.local/extension.js \
+    squashfs-root/usr/bin/mythos \
+    squashfs-root/usr/bin/mythosctl \
+    squashfs-root/usr/share/applications/org.mythos.SystemHub.desktop \
+    squashfs-root/usr/share/gnome-shell/extensions/mythos-shell@mythos.local/extension.js \
     squashfs-root/etc/calamares/settings.conf \
-    squashfs-root/usr/lib/systemd/system/consumeros-offline-update.service; do
+    squashfs-root/usr/lib/systemd/system/mythos-offline-update.service; do
     if ! rg -F -q "${path}" "${inspection_dir}/squashfs.txt"; then
         printf 'Required image path is absent: %s\n' "${path#squashfs-root}" >&2
         exit 5

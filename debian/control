@@ -1,7 +1,7 @@
-Source: consumeros
+Source: mythos
 Section: admin
 Priority: optional
-Maintainer: ConsumerOS Build Team <build@consumeros.invalid>
+Maintainer: MythOS Build Team <build@mythos.invalid>
 Build-Depends:
  debhelper-compat (= 13),
  dh-python,
@@ -12,7 +12,7 @@ Build-Depends:
 Standards-Version: 4.7.2
 Rules-Requires-Root: no
 
-Package: consumeros-core
+Package: mythos-core
 Architecture: all
 Depends:
  ${misc:Depends},
@@ -51,7 +51,7 @@ Suggests:
  wine
 Replaces:
  calamares-settings-debian
-Description: ConsumerOS desktop, update, recovery, and compatibility tools
- Native graphical and command-line control plane for ConsumerOS. It provides
+Description: MythOS desktop, update, recovery, and compatibility tools
+ Native graphical and command-line control plane for MythOS. It provides
  system status, transactional offline updates, hardware and firmware discovery,
  recovery, application compatibility, migration, and optional feature profiles.

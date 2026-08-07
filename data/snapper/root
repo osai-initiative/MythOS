@@ -1,4 +1,4 @@
-# ConsumerOS root snapshot policy
+# MythOS root snapshot policy
 SUBVOLUME="/"
 FSTYPE="btrfs"
 QGROUP=""

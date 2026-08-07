@@ -1,4 +1,4 @@
-.consumeros-search {
+.mythos-search {
   margin: 5px 8px;
   padding: 0 14px;
   border-radius: 999px;
@@ -7,17 +7,17 @@
   box-shadow: 0 3px 16px rgba(0, 0, 0, 0.32);
 }
 
-.consumeros-search:hover,
-.consumeros-search:focus {
+.mythos-search:hover,
+.mythos-search:focus {
   background-color: rgba(74, 107, 205, 0.48);
   border-color: rgba(177, 203, 255, 0.68);
 }
 
-.consumeros-search-content {
+.mythos-search-content {
   spacing: 7px;
 }
 
-.consumeros-search-content StLabel {
+.mythos-search-content StLabel {
   color: rgba(245, 248, 255, 0.92);
   font-size: 0.92em;
 }

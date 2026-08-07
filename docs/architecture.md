@@ -1,10 +1,10 @@
-# ConsumerOS v1 architecture
+# MythOS v1 architecture
 
 ## Product boundary
 
-ConsumerOS v1 is an amd64 Debian 13 live and installed system. Debian owns the
+MythOS v1 is an amd64 Debian 13 live and installed system. Debian owns the
 kernel, boot chain, hardware enablement, package archive, and GNOME session.
-ConsumerOS owns the default experience and the control plane that connects the
+MythOS owns the default experience and the control plane that connects the
 installer, updates, restore points, recovery, drivers, optional features,
 migration, and application launchers.
 
@@ -19,12 +19,12 @@ inside components with established upstream update paths.
 2. GNOME 48 runs on Wayland by default. XWayland and the GNOME X11 session are
    included for compatibility.
 3. Dash to Panel and ArcMenu provide the familiar bottom taskbar and menu. The
-   small ConsumerOS Shell extension adds the adjacent Search control and a
+   small MythOS Shell extension adds the adjacent Search control and a
    screen-recording Quick Settings action.
 4. Flatpak and xdg-desktop-portal provide the default application boundary.
    Debian packages remain available for system components and power users.
-5. `consumeros-core` provides the native System Hub, welcome flow, migration
-   assistant, portable-application opener, and the JSON `consumerosctl`
+5. `mythos-core` provides the native System Hub, welcome flow, migration
+   assistant, portable-application opener, and the JSON `mythosctl`
    control interface.
 
 ## Installation layout
@@ -40,10 +40,10 @@ unencrypted `COS_RECOVERY` ext4 partition, and an optionally encrypted Btrfs
 | `@snapshots` | `/.snapshots` | Snapper restore points |
 | `@cache` | `/var/cache` | Package and application caches |
 | `@log` | `/var/log` | Logs that survive system rollback |
-| `@state` | `/var/lib/consumeros` | Transaction and boot-health state |
+| `@state` | `/var/lib/mythos` | Transaction and boot-health state |
 | `@swap` | swap file mount | Btrfs-safe swap and hibernation choice |
 
-During installation, `consumerosctl install-finalize` copies the live
+During installation, `mythosctl install-finalize` copies the live
 SquashFS, kernel, and initramfs to the recovery partition. It then protects
 the partition as read-only and on-demand in the installed `/etc/fstab`.
 The GRUB generator addresses it by filesystem UUID, so disk enumeration does

@@ -24,8 +24,8 @@ class ScreenRecordingToggle extends QuickSettings.QuickToggle {
     }
 });
 
-const ConsumerOSIndicator = GObject.registerClass(
-class ConsumerOSIndicator extends QuickSettings.SystemIndicator {
+const MythOSIndicator = GObject.registerClass(
+class MythOSIndicator extends QuickSettings.SystemIndicator {
     constructor() {
         super();
         this.quickSettingsItems.push(new ScreenRecordingToggle());
@@ -37,13 +37,13 @@ class ConsumerOSIndicator extends QuickSettings.SystemIndicator {
     }
 });
 
-export default class ConsumerOSExtension extends Extension {
+export default class MythOSExtension extends Extension {
     enable() {
         this._search = new PanelMenu.Button(0.0, 'Search applications and files', false);
-        this._search.add_style_class_name('consumeros-search');
+        this._search.add_style_class_name('mythos-search');
 
         const content = new St.BoxLayout({
-            style_class: 'consumeros-search-content',
+            style_class: 'mythos-search-content',
             x_align: Clutter.ActorAlign.CENTER,
             y_align: Clutter.ActorAlign.CENTER,
         });
@@ -51,9 +51,9 @@ export default class ConsumerOSExtension extends Extension {
         content.add_child(new St.Label({text: 'Search', y_align: Clutter.ActorAlign.CENTER}));
         this._search.add_child(content);
         this._search.connect('clicked', () => this._openSearch());
-        Main.panel.addToStatusArea('consumeros-search', this._search, 1, 'left');
+        Main.panel.addToStatusArea('mythos-search', this._search, 1, 'left');
 
-        this._quickSettings = new ConsumerOSIndicator();
+        this._quickSettings = new MythOSIndicator();
         Main.panel.statusArea.quickSettings.addExternalIndicator(this._quickSettings);
     }
 

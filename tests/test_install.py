@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from consumeros.install import finalize_install
+from mythos.install import finalize_install
 
 
 def test_finalize_populates_recovery_and_protects_mount(tmp_path: Path, monkeypatch) -> None:
@@ -10,7 +10,7 @@ def test_finalize_populates_recovery_and_protects_mount(tmp_path: Path, monkeypa
     live = tmp_path / "medium"
     (target / "etc").mkdir(parents=True)
     (target / "recovery").mkdir()
-    (target / "etc" / "os-release").write_text("NAME=ConsumerOS\n", encoding="utf-8")
+    (target / "etc" / "os-release").write_text("NAME=MythOS\n", encoding="utf-8")
     (target / "etc" / "fstab").write_text(
         "UUID=root / btrfs defaults 0 0\nUUID=recovery /recovery ext4 defaults 0 2\n",
         encoding="utf-8",
@@ -24,5 +24,5 @@ def test_finalize_populates_recovery_and_protects_mount(tmp_path: Path, monkeypa
     assert (target / "recovery/live/filesystem.squashfs").exists()
     fstab = (target / "etc/fstab").read_text(encoding="utf-8")
     assert "ro,nofail,x-systemd.automount" in fstab
-    assert (target / "etc/consumeros/release").exists()
+    assert (target / "etc/mythos/release").exists()
 

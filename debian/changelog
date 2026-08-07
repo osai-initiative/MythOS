@@ -1,6 +1,6 @@
-consumeros (1.0.0) trixie; urgency=medium
+mythos (1.0.0) trixie; urgency=medium
 
-  * Initial ConsumerOS v1 system package.
+  * Initial MythOS v1 system package.
 
- -- ConsumerOS Build Team <build@consumeros.invalid>  Fri, 07 Aug 2026 00:00:00 -0500
+ -- MythOS Build Team <build@mythos.invalid>  Fri, 07 Aug 2026 00:00:00 -0500
 

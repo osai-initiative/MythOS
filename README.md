@@ -1,6 +1,6 @@
-# ConsumerOS v1
+# MythOS v1
 
-ConsumerOS is a Debian-based desktop operating system for people who want a
+MythOS is a Debian-based desktop operating system for people who want a
 computer, not a Linux hobby. This repository builds an amd64 hybrid live ISO,
 the installed operating system, and the native graphical tools that connect
 updates, drivers, recovery, migration, application compatibility, backup, and
@@ -48,7 +48,7 @@ where the hardware stack provides it.
 ## Honest compatibility boundary
 
 No operating system can guarantee every Windows game, anti-cheat driver,
-printer, or vendor firmware on arbitrary hardware. ConsumerOS reports what it
+printer, or vendor firmware on arbitrary hardware. MythOS reports what it
 can verify, keeps untested software marked untested, and delegates Windows
 runtime isolation to Bottles/Wine/Proton rather than inventing another Wine
 prefix manager.
@@ -75,7 +75,7 @@ roughly 25 GiB of temporary space, and network access to Debian mirrors. Build
 parameters can be overridden without editing the project:
 
 ```bash
-CONSUMEROS_ARCH=amd64 CONSUMEROS_MIRROR=https://deb.debian.org/debian make iso
+MYTHOS_ARCH=amd64 MYTHOS_MIRROR=https://deb.debian.org/debian make iso
 ```
 
 See [architecture](docs/architecture.md), [security model](docs/security.md),

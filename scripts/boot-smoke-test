@@ -4,11 +4,11 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 VERSION="$(tr -d '[:space:]' < "${PROJECT_ROOT}/VERSION")"
-ARCH="${CONSUMEROS_ARCH:-amd64}"
-ISO="${1:-${PROJECT_ROOT}/.build/artifacts/consumeros-${VERSION}-${ARCH}.iso}"
+ARCH="${MYTHOS_ARCH:-amd64}"
+ISO="${1:-${PROJECT_ROOT}/.build/artifacts/mythos-${VERSION}-${ARCH}.iso}"
 ARTIFACT_DIR="${PROJECT_ROOT}/.build/artifacts"
-OVMF_CODE="${CONSUMEROS_OVMF_CODE:-/usr/share/OVMF/OVMF_CODE_4M.secboot.fd}"
-OVMF_VARS="${CONSUMEROS_OVMF_VARS:-/usr/share/OVMF/OVMF_VARS_4M.ms.fd}"
+OVMF_CODE="${MYTHOS_OVMF_CODE:-/usr/share/OVMF/OVMF_CODE_4M.secboot.fd}"
+OVMF_VARS="${MYTHOS_OVMF_VARS:-/usr/share/OVMF/OVMF_VARS_4M.ms.fd}"
 
 if [[ -r /dev/kvm && -w /dev/kvm ]]; then
     QEMU_ACCEL="kvm"
@@ -19,7 +19,7 @@ else
     QEMU_CPU="max"
     DEFAULT_WAIT=180
 fi
-WAIT_SECONDS="${CONSUMEROS_SMOKE_WAIT:-${DEFAULT_WAIT}}"
+WAIT_SECONDS="${MYTHOS_SMOKE_WAIT:-${DEFAULT_WAIT}}"
 TIMEOUT_SECONDS="$((WAIT_SECONDS + 45))"
 if (( WAIT_SECONDS < 20 )); then
     printf 'Smoke wait must be at least 20 seconds.\n' >&2
@@ -63,7 +63,7 @@ set +e
     sleep 2
     printf 'info status\nquit\n'
 } | timeout --signal=TERM "${TIMEOUT_SECONDS}" qemu-system-x86_64 \
-    -name ConsumerOS-UEFI-smoke \
+    -name MythOS-UEFI-smoke \
     -machine "q35,smm=on,accel=${QEMU_ACCEL}" \
     -cpu "${QEMU_CPU}" \
     -smp 2 \

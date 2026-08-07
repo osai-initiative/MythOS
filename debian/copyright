@@ -1,10 +1,10 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: ConsumerOS
-Source: https://consumeros.invalid/
+Upstream-Name: MythOS
+Source: https://mythos.invalid/
 
 Files: *
-Copyright: 2026 ConsumerOS Build Team
-License: LicenseRef-ConsumerOS-Unlicensed
+Copyright: 2026 MythOS Build Team
+License: LicenseRef-MythOS-Unlicensed
  This source tree does not grant a public redistribution license. Choose and
- document a project license before publishing ConsumerOS source or binary
+ document a project license before publishing MythOS source or binary
  images outside the organization that owns this work.

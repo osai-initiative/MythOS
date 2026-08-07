@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from consumeros.migration import WindowsProfile, build_plan, discover_windows_profiles, execute_plan
+from mythos.migration import WindowsProfile, build_plan, discover_windows_profiles, execute_plan
 
 
 def make_windows_tree(root: Path) -> WindowsProfile:

@@ -3,19 +3,19 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "consumeros"
+name = "mythos"
 version = "1.0.0"
-description = "Consumer-facing control and recovery plane for ConsumerOS"
+description = "Consumer-facing control and recovery plane for MythOS"
 requires-python = ">=3.11"
 
 [project.scripts]
-consumeros = "consumeros.gui:main"
-consumeros-drivers = "consumeros.gui:drivers_main"
-consumeros-recovery = "consumeros.gui:recovery_main"
-consumerosctl = "consumeros.cli:main"
-consumeros-welcome = "consumeros.welcome:main"
-consumeros-migrate = "consumeros.migrate_gui:main"
-consumeros-open = "consumeros.open_app:main"
+mythos = "mythos.gui:main"
+mythos-drivers = "mythos.gui:drivers_main"
+mythos-recovery = "mythos.gui:recovery_main"
+mythosctl = "mythos.cli:main"
+mythos-welcome = "mythos.welcome:main"
+mythos-migrate = "mythos.migrate_gui:main"
+mythos-open = "mythos.open_app:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
@@ -30,4 +30,4 @@ testpaths = ["tests"]
 
 [tool.coverage.run]
 branch = true
-source = ["consumeros"]
+source = ["mythos"]

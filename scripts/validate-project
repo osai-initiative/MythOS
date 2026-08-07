@@ -13,10 +13,10 @@ REQUIRED = (
     "VERSION",
     "pyproject.toml",
     "debian/control",
-    "config/package-lists/consumeros.list.chroot",
+    "config/package-lists/mythos.list.chroot",
     "data/calamares/settings.conf",
     "data/calamares/modules/partition.conf",
-    "data/systemd/system/consumeros-offline-update.service",
+    "data/systemd/system/mythos-offline-update.service",
     "data/shell-extension/extension.js",
     "debian/copyright",
     "scripts/verify-image",
@@ -43,22 +43,22 @@ for source in list((ROOT / "data/metainfo").glob("*.xml")) + list((ROOT / "data/
     ET.parse(source)
 
 packages = []
-for line in (ROOT / "config/package-lists/consumeros.list.chroot").read_text(encoding="utf-8").splitlines():
+for line in (ROOT / "config/package-lists/mythos.list.chroot").read_text(encoding="utf-8").splitlines():
     value = line.strip()
     if value and not value.startswith("#"):
         packages.append(value)
 duplicates = sorted({item for item in packages if packages.count(item) > 1})
 if duplicates:
     fail("duplicate image packages: " + ", ".join(duplicates))
-if "consumeros-core" not in packages:
-    fail("image does not install consumeros-core")
+if "mythos-core" not in packages:
+    fail("image does not install mythos-core")
 
 desktop_ids = {item.name for item in (ROOT / "data/applications").glob("*.desktop")}
-for required in ("org.consumeros.SystemHub.desktop", "org.consumeros.Migration.desktop", "org.consumeros.Open.desktop"):
+for required in ("org.mythos.SystemHub.desktop", "org.mythos.Migration.desktop", "org.mythos.Open.desktop"):
     if required not in desktop_ids:
         fail(f"missing desktop entry {required}")
 
-grub_generator = (ROOT / "data/grub/42_consumeros_recovery").read_text(encoding="utf-8")
+grub_generator = (ROOT / "data/grub/42_mythos_recovery").read_text(encoding="utf-8")
 if "(\\u0024recovery)" in grub_generator or "(\\$recovery)" not in grub_generator:
     fail("recovery GRUB generator does not emit the recovery variable")
 
@@ -109,7 +109,7 @@ for instance_key in sorted(ref for ref in sequence_refs if "@" in ref):
     if instance is None or instance.get("module") != module:
         fail(f"undefined Calamares instance {instance_key}")
 
-dconf_defaults = (ROOT / "data/dconf/00-consumeros").read_text(encoding="utf-8")
+dconf_defaults = (ROOT / "data/dconf/00-mythos").read_text(encoding="utf-8")
 for setting in (
     "color-scheme='prefer-dark'",
     "aurora-glass.png",

@@ -1,4 +1,4 @@
-# ConsumerOS v1 release acceptance
+# MythOS v1 release acceptance
 
 An ISO artifact is a candidate, not a consumer release, until every required
 gate below has evidence for the exact SHA-256 being shipped. Use `Pass`,
@@ -9,7 +9,7 @@ gate below has evidence for the exact SHA-256 being shipped. Use `Pass`,
 | Gate | Command | Required result |
 | --- | --- | --- |
 | Source and catalog validation | `make validate` | Unit tests, Python compilation, shell lint, XML, desktop, catalog, and project invariants pass |
-| Debian package | `make package` | `consumeros-core_1.0.0_all.deb` builds and installs with dependencies |
+| Debian package | `make package` | `mythos-core_1.0.0_all.deb` builds and installs with dependencies |
 | Hybrid image | `make iso` | ISO and matching SHA-256 are produced |
 | Image contents | `scripts/verify-image` | BIOS and UEFI boot records plus required rootfs payload are present |
 | Virtual boot | `make smoke` | Signed UEFI path reaches a non-blank graphical live session and captures evidence |
@@ -26,7 +26,7 @@ gate below has evidence for the exact SHA-256 being shipped. Use `Pass`,
 | Recovery partition | GRUB entry boots the copied image without the USB attached |
 | Rollback | Injected offline APT failure restores the pre-update system and preserves `/home`, logs, and update state |
 | Reset settings | GNOME settings backup is created and personal files/apps stay unchanged |
-| Repair bootloader | Explicit known test target is repaired; an unrelated or non-ConsumerOS target is rejected |
+| Repair bootloader | Explicit known test target is repaired; an unrelated or non-MythOS target is rejected |
 
 ## Daily-driver hardware gates
 
