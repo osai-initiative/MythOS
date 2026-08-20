@@ -21,6 +21,9 @@ from .recovery import (
     reset_desktop_settings,
     rollback_snapshot,
 )
+from .release import check as check_release
+from .release import set_channel as set_release_channel
+from .release import stage as stage_release
 from .system import system_status
 from .updates import (
     apply_offline_update,
@@ -165,6 +168,12 @@ def build_parser() -> argparse.ArgumentParser:
     ssh = commands.add_parser("ssh", help="enable or disable remote login")
     ssh.add_argument("state", choices=["enable", "disable"])
 
+    release = commands.add_parser("release", help="check signed MythOS release tracks").add_subparsers(dest="release_command", required=True)
+    release.add_parser("check")
+    release.add_parser("stage")
+    release_channel = release.add_parser("channel")
+    release_channel.add_argument("name", choices=["stable", "rolling"])
+
     finalize = commands.add_parser("install-finalize", help=argparse.SUPPRESS)
     finalize.add_argument("target")
     finalize.add_argument("--live-medium", default="/run/live/medium")
@@ -230,6 +239,12 @@ def dispatch(args: argparse.Namespace) -> Any:
         return _set_preference(args.key, args.value, args.acknowledge_compatibility_warning)
     if args.command == "ssh":
         return _ssh(args.state == "enable")
+    if args.command == "release":
+        if args.release_command == "check":
+            return asdict(check_release())
+        if args.release_command == "stage":
+            return stage_release()
+        return set_release_channel(args.name)
     if args.command == "install-finalize":
         return finalize_install(args.target, args.live_medium)
     if args.command == "initialize":
@@ -254,4 +269,3 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

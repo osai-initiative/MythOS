@@ -269,6 +269,53 @@ def stage_update() -> dict[str, Any]:
         return state
 
 
+def stage_release_package(package: Path, version: str, channel: str) -> dict[str, Any]:
+    """Stage a signature-verified local MythOS package for offline installation."""
+
+    require_root()
+    cache_root = rooted("/var/cache/mythos/releases").resolve()
+    try:
+        package.resolve().relative_to(cache_root)
+    except ValueError:
+        raise MythOSError("The signed release package is not in the MythOS release cache.")
+    if not package.is_file():
+        raise MythOSError("The signed release package is not in the MythOS release cache.")
+    if not version or channel not in {"stable", "rolling"}:
+        raise MythOSError("The signed release metadata is invalid.")
+    if rooted("/run/live/medium").exists():
+        raise MythOSError("Install MythOS before applying a release update.")
+    if not snapshotter_ready():
+        raise MythOSError("Release updates require the MythOS Btrfs snapshot layout.")
+    with file_lock(_lock_path()):
+        if rooted(ROLLBACK_REQUEST).exists():
+            raise MythOSError("Restart to finish the pending rollback before staging another update.")
+        simulation = run(["apt-get", "-s", "--no-remove", "install", str(package)], check=True, timeout=300)
+        transaction = uuid.uuid4().hex
+        snapshot = _create_snapshot(f"MythOS pre-release {version} {transaction[:8]}")
+        state = {
+            "status": "downloading",
+            "kind": "release",
+            "transaction": transaction,
+            "snapshot": snapshot,
+            "release_version": version,
+            "release_channel": channel,
+            "release_package": str(package),
+            "packages": [asdict(item) for item in parse_simulation(simulation.stdout)],
+            "message": "Preparing the signed MythOS release update.",
+        }
+        _write_state(state)
+        downloaded = run(["apt-get", "-y", "--download-only", "--no-remove", "install", str(package)], timeout=3600)
+        if not downloaded.ok:
+            state.update({"status": "failed", "message": "The release update dependencies could not be downloaded.", "error": downloaded.stderr[-4000:]})
+            _write_state(state)
+            _append_history(dict(state))
+            raise MythOSError(state["message"])
+        state.update({"status": "staged", "message": f"MythOS {version} is ready. Restart to install it."})
+        _write_state(state)
+        _set_system_update_link()
+        return state
+
+
 def cancel_staged_update() -> dict[str, Any]:
     require_root()
     with file_lock(_lock_path()):
@@ -291,22 +338,31 @@ def apply_offline_update() -> dict[str, Any]:
         if state.get("status") != "staged":
             _remove_system_update_link()
             raise MythOSError("No complete staged update is available.")
+        package: str | None = None
+        if state.get("kind") == "release":
+            candidate = state.get("release_package")
+            cache_root = rooted("/var/cache/mythos/releases").resolve()
+            try:
+                if not isinstance(candidate, str):
+                    raise ValueError
+                package_path = Path(candidate).resolve()
+                package_path.relative_to(cache_root)
+            except ValueError:
+                raise MythOSError("The staged release package is invalid.")
+            if not package_path.is_file():
+                raise MythOSError("The staged release package is invalid.")
+            package = str(package_path)
         snapshot = int(state["snapshot"])
         # Remove this before touching packages so a crash cannot create a boot loop.
         _remove_system_update_link()
         state.update({"status": "applying", "message": "Installing the system update."})
         _write_state(state)
-        result = run(
-            [
-                "apt-get",
-                "-y",
-                "--no-download",
-                "-o",
-                "Dpkg::Options::=--force-confold",
-                "dist-upgrade",
-            ],
-            timeout=7200,
-        )
+        if state.get("kind") == "release":
+            assert package is not None
+            command = ["apt-get", "-y", "--no-download", "--no-remove", "-o", "Dpkg::Options::=--force-confold", "install", package]
+        else:
+            command = ["apt-get", "-y", "--no-download", "-o", "Dpkg::Options::=--force-confold", "dist-upgrade"]
+        result = run(command, timeout=7200)
         if result.ok:
             post = _create_snapshot(f"MythOS post-update {state['transaction'][:8]}", pre_number=snapshot)
             state.update(

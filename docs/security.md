@@ -17,6 +17,16 @@
 
 ## Update trust and rollback
 
+MythOS release upgrades are available only from the signed `stable` and
+`rolling` tracks. The installed public key verifies a detached release
+manifest before any package is accepted; the manifest pins the exact GitHub
+release asset and SHA-256. HTTPS delivery and the discovery endpoint are not
+trusted in place of that signature. The signing key is held in a protected
+GitHub Actions environment with required approval, and is rotated rather than
+replaced silently. A separately approved recovery workflow can export a
+one-day encrypted backup only to an operator-supplied OpenPGP public key; it
+never uploads plaintext signing material as an artifact.
+
 APT sources use Debian's archive keyring. Stable and Current both retain the
 Debian stable base. Update state, errors, and the bounded transaction history
 are mode `0600` under `/var/lib/mythos`.

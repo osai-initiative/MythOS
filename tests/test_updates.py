@@ -1,16 +1,20 @@
 import os
 from pathlib import Path
 
+import pytest
+
 from mythos.constants import ROLLBACK_COMPLETE, ROLLBACK_REQUEST, SYSTEM_UPDATE_LINK, SYSTEM_UPDATE_TARGET
 from mythos.models import CommandResult
 from mythos.updates import (
     _system_update_requested,
+    apply_offline_update,
     bless_boot,
     consumer_layout_ready,
     parse_simulation,
     schedule_rollback,
+    stage_release_package,
 )
-from mythos.util import read_json, write_json
+from mythos.util import MythOSError, read_json, write_json
 
 
 def test_parse_apt_simulation() -> None:
@@ -75,3 +79,63 @@ def test_offline_update_link_must_target_mythos(tmp_path: Path, monkeypatch) -> 
     link.unlink()
     link.symlink_to("/var/lib/another-updater")
     assert not _system_update_requested()
+
+
+def test_signed_release_is_staged_for_offline_install(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("MYTHOS_ROOT", str(tmp_path))
+    monkeypatch.setattr(os, "geteuid", lambda: 0)
+    package = tmp_path / "var/cache/mythos/releases/1.0.1/mythos-core_1.0.1_all.deb"
+    package.parent.mkdir(parents=True)
+    package.write_bytes(b"signed package")
+    monkeypatch.setattr("mythos.updates.snapshotter_ready", lambda: True)
+    monkeypatch.setattr("mythos.updates._create_snapshot", lambda _description: 9)
+    monkeypatch.setattr("mythos.updates.run", lambda argv, **_kwargs: CommandResult(list(argv), 0, "0 upgraded\n", ""))
+
+    state = stage_release_package(package, "1.0.1", "rolling")
+    assert state["kind"] == "release"
+    assert state["status"] == "staged"
+    assert _system_update_requested()
+
+
+def test_release_stage_rejects_cache_prefix_confusion(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("MYTHOS_ROOT", str(tmp_path))
+    monkeypatch.setattr(os, "geteuid", lambda: 0)
+    package = tmp_path / "var/cache/mythos/releases-evil/1.0.1/mythos-core_1.0.1_all.deb"
+    package.parent.mkdir(parents=True)
+    package.write_bytes(b"not in the release cache")
+
+    with pytest.raises(MythOSError, match="release cache"):
+        stage_release_package(package, "1.0.1", "rolling")
+
+
+def test_release_stage_rejects_invalid_signed_metadata(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("MYTHOS_ROOT", str(tmp_path))
+    monkeypatch.setattr(os, "geteuid", lambda: 0)
+    package = tmp_path / "var/cache/mythos/releases/1.0.1/mythos-core_1.0.1_all.deb"
+    package.parent.mkdir(parents=True)
+    package.write_bytes(b"signed package")
+
+    with pytest.raises(MythOSError, match="metadata"):
+        stage_release_package(package, "1.0.1", "preview")
+
+
+def test_offline_release_rejects_outside_cache_before_mutating_state(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("MYTHOS_ROOT", str(tmp_path))
+    monkeypatch.setattr(os, "geteuid", lambda: 0)
+    state_path = tmp_path / "var/lib/mythos/update.json"
+    original = {
+        "status": "staged",
+        "kind": "release",
+        "snapshot": 5,
+        "transaction": "release-test",
+        "release_package": str(tmp_path / "tmp/attacker.deb"),
+    }
+    write_json(state_path, original)
+    link = tmp_path / SYSTEM_UPDATE_LINK.removeprefix("/")
+    link.symlink_to(SYSTEM_UPDATE_TARGET)
+    monkeypatch.setattr("mythos.updates.run", lambda *_args, **_kwargs: pytest.fail("apt must not run"))
+
+    with pytest.raises(MythOSError, match="staged release package is invalid"):
+        apply_offline_update()
+    assert _system_update_requested()
+    assert read_json(state_path, {}) == original

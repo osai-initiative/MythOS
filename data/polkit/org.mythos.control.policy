@@ -58,6 +58,16 @@
     <message>Authentication is required to change remote login settings</message>
     <defaults><allow_any>no</allow_any><allow_inactive>auth_admin</allow_inactive><allow_active>auth_admin</allow_active></defaults>
   </action>
+  <action id="org.mythos.control.release-stage">
+    <description>Stage a signed MythOS release update</description>
+    <message>Authentication is required to stage a MythOS release update</message>
+    <defaults><allow_any>no</allow_any><allow_inactive>auth_admin</allow_inactive><allow_active>auth_admin</allow_active></defaults>
+  </action>
+  <action id="org.mythos.control.release-channel">
+    <description>Change the MythOS release channel</description>
+    <message>Authentication is required to change the MythOS release channel</message>
+    <defaults><allow_any>no</allow_any><allow_inactive>auth_admin</allow_inactive><allow_active>auth_admin_keep</allow_active></defaults>
+  </action>
   <action id="org.mythos.control.feature-windows-apps"><description>Install Windows Apps capability</description><message>Authentication is required to install this capability</message><defaults><allow_any>no</allow_any><allow_inactive>auth_admin</allow_inactive><allow_active>auth_admin_keep</allow_active></defaults></action>
   <action id="org.mythos.control.feature-gaming"><description>Install Gaming capability</description><message>Authentication is required to install this capability</message><defaults><allow_any>no</allow_any><allow_inactive>auth_admin</allow_inactive><allow_active>auth_admin_keep</allow_active></defaults></action>
   <action id="org.mythos.control.feature-appimages"><description>Install Portable Apps capability</description><message>Authentication is required to install this capability</message><defaults><allow_any>no</allow_any><allow_inactive>auth_admin</allow_inactive><allow_active>auth_admin_keep</allow_active></defaults></action>

@@ -12,6 +12,7 @@ from .util import atomic_write
 @dataclass(slots=True)
 class Config:
     channel: str = "stable"
+    release_channel: str = "stable"
     diagnostics: bool = False
     macos_preview: bool = False
     transparency: bool = False
@@ -34,6 +35,7 @@ class Config:
         features = raw.get("features", {})
         return cls(
             channel=system.get("channel", "stable"),
+            release_channel=system.get("release_channel", "stable"),
             diagnostics=bool(privacy.get("diagnostics", False)),
             macos_preview=bool(features.get("macos_preview", False)),
             transparency=bool(appearance.get("transparency", False)),
@@ -47,6 +49,7 @@ class Config:
             "# Managed by MythOS System Hub.\n"
             "[system]\n"
             f'channel = "{self.channel}"\n\n'
+            f'release_channel = "{self.release_channel}"\n\n'
             "[privacy]\n"
             f"diagnostics = {str(self.diagnostics).lower()}\n\n"
             "[appearance]\n"

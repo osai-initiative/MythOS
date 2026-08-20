@@ -7,6 +7,7 @@ def test_config_round_trip(tmp_path: Path) -> None:
     path = tmp_path / "config.toml"
     expected = Config(
         channel="current",
+        release_channel="rolling",
         diagnostics=True,
         macos_preview=True,
         transparency=True,
@@ -22,4 +23,3 @@ def test_invalid_config_uses_safe_defaults(tmp_path: Path) -> None:
     path = tmp_path / "config.toml"
     path.write_text("this is not toml = [", encoding="utf-8")
     assert Config.load(path) == Config()
-

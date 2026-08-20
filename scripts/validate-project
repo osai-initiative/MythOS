@@ -21,6 +21,9 @@ REQUIRED = (
     "debian/copyright",
     "scripts/verify-image",
     "scripts/boot-smoke-test",
+    "data/keys/mythos-release-signing.gpg",
+    "scripts/build-release-update",
+    "scripts/install-mythos-in-place",
 )
 
 

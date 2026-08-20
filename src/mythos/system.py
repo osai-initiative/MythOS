@@ -130,6 +130,7 @@ def system_status() -> dict[str, Any]:
         "session": os.environ.get("XDG_SESSION_TYPE", "unknown"),
         "desktop": os.environ.get("XDG_CURRENT_DESKTOP", "unknown"),
         "channel": config.channel,
+        "release_channel": config.release_channel,
         "health": Health.READY.value if not concerns else Health.ATTENTION.value,
         "concerns": concerns,
         "memory": _memory(),

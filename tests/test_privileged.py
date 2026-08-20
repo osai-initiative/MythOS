@@ -11,6 +11,7 @@ def test_operations_use_distinct_polkit_actions() -> None:
     assert action_for(["drivers", "install-recommended"]) == "org.mythos.control.drivers-install"
     assert action_for(["update", "channel", "current"]) == "org.mythos.control.update-channel"
     assert action_for(["preference", "macos-preview", "enabled", "--acknowledge-compatibility-warning"]) == "org.mythos.control.preference-set"
+    assert action_for(["release", "stage"]) == "org.mythos.control.release-stage"
 
 
 def test_every_feature_has_a_polkit_action() -> None:
@@ -28,6 +29,7 @@ def test_every_feature_has_a_polkit_action() -> None:
         ["preference", "unknown", "enabled"],
         ["snapshots", "rollback", "0"],
         ["recovery", "repair-bootloader", "/dev/sda"],
+        ["release", "channel", "preview"],
     ],
 )
 def test_operation_allowlist_rejects_unapproved_requests(argv: list[str]) -> None:

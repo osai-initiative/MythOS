@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-.PHONY: test lint validate package iso smoke clean
+.PHONY: test lint validate package iso smoke release-update clean
 
 test:
 	python3 -m pytest
@@ -21,6 +21,8 @@ iso:
 smoke:
 	./scripts/boot-smoke-test
 
+release-update:
+	./scripts/build-release-update
+
 clean:
 	./scripts/clean-build
-

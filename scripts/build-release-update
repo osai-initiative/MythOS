@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
+CHANNEL="${MYTHOS_RELEASE_CHANNEL:-stable}"
+VERSION="${MYTHOS_RELEASE_VERSION:-$(tr -d '[:space:]' < "${PROJECT_ROOT}/VERSION")}"
+TAG="${MYTHOS_RELEASE_TAG:-v${VERSION}}"
+KEY="${MYTHOS_RELEASE_SIGNING_KEY:?Set MYTHOS_RELEASE_SIGNING_KEY to the release key fingerprint.}"
+ARTIFACT_DIR="${PROJECT_ROOT}/.build/artifacts"
+RELEASE_DIR="${ARTIFACT_DIR}/mythos-${VERSION}-${CHANNEL}-update"
+
+case "${CHANNEL}" in stable|rolling) ;; *) printf 'Invalid release channel: %s\n' "${CHANNEL}" >&2; exit 2 ;; esac
+[[ "${TAG}" =~ ^[A-Za-z0-9._-]+$ ]] || { printf 'Invalid release tag.\n' >&2; exit 2; }
+[[ "${VERSION}" =~ ^[A-Za-z0-9.+:~_-]+$ ]] || { printf 'Invalid release version.\n' >&2; exit 2; }
+
+MYTHOS_PACKAGE_VERSION="${VERSION}" "${SCRIPT_DIR}/build-package"
+packages=()
+while IFS= read -r candidate; do
+    if [[ "$(dpkg-deb -f "${candidate}" Version)" == "${VERSION}" ]]; then
+        packages+=("${candidate}")
+    fi
+done < <(find "${ARTIFACT_DIR}" -maxdepth 1 -type f -name 'mythos-core_*_all.deb' -print | sort)
+if (( ${#packages[@]} != 1 )); then
+    printf 'Expected exactly one versioned MythOS package in %s\n' "${ARTIFACT_DIR}" >&2
+    exit 2
+fi
+
+rm -rf -- "${RELEASE_DIR}"
+mkdir -p "${RELEASE_DIR}"
+package="${packages[0]}"
+package_name="$(basename "${package}")"
+package_sha256="$(sha256sum "${package}" | awk '{print $1}')"
+install -m 0644 "${package}" "${RELEASE_DIR}/${package_name}"
+install -m 0644 "${PROJECT_ROOT}/data/keys/mythos-release-signing.gpg" "${RELEASE_DIR}/mythos-release-signing.gpg"
+install -m 0755 "${SCRIPT_DIR}/install-mythos-in-place" "${RELEASE_DIR}/install-mythos-in-place.sh"
+
+python3 - "${RELEASE_DIR}/mythos-release.json" "${CHANNEL}" "${VERSION}" "${TAG}" "${package_name}" "${package_sha256}" <<'PY'
+import json
+import sys
+from datetime import datetime, timezone
+
+path, channel, version, tag, name, digest = sys.argv[1:]
+base = f"https://github.com/osai-initiative/MythOS/releases/download/{tag}"
+value = {
+    "schema": 1,
+    "product": "MythOS",
+    "channel": channel,
+    "version": version,
+    "released_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    "artifacts": [{"kind": "deb", "name": name, "architecture": "x86_64", "url": f"{base}/{name}", "sha256": digest}],
+}
+with open(path, "w", encoding="utf-8") as handle:
+    json.dump(value, handle, indent=2, sort_keys=True)
+    handle.write("\n")
+PY
+
+sign=(gpg --batch --yes --armor --detach-sign --local-user "${KEY}")
+if [[ -n "${MYTHOS_RELEASE_SIGNING_PASSPHRASE:-}" ]]; then
+    sign+=(--pinentry-mode loopback --passphrase "${MYTHOS_RELEASE_SIGNING_PASSPHRASE}")
+fi
+"${sign[@]}" --output "${RELEASE_DIR}/mythos-release.json.asc" "${RELEASE_DIR}/mythos-release.json"
+(cd "${RELEASE_DIR}" && sha256sum "${package_name}" mythos-release-signing.gpg mythos-release.json mythos-release.json.asc install-mythos-in-place.sh > SHA256SUMS)
+tar --create --gzip --file "${ARTIFACT_DIR}/mythos-${VERSION}-${CHANNEL}-update.tar.gz" -C "${ARTIFACT_DIR}" "$(basename "${RELEASE_DIR}")"
+printf 'Signed release update: %s\n' "${RELEASE_DIR}"

@@ -203,6 +203,21 @@ class SystemHub(Adw.Application):
         channel_group.add(combo)
         self.status_rows["channel-combo"] = combo
         content.append(channel_group)
+
+        release_group = self._group("MythOS release track", "Stable is the default. Rolling contains signed beta releases.")
+        release_status = self._row("Check signed MythOS releases", "Checks only signed manifests from the official release channel.", "software-update-available-symbolic")
+        release_status.add_suffix(self._button("Check", lambda button: self._release_check(button)))
+        release_group.add(release_status)
+        self.status_rows["release-status"] = release_status
+        release_model = Gtk.StringList.new(["Stable — recommended", "Rolling — beta releases"])
+        release_combo = Adw.ComboRow(title="Release track", subtitle="Rolling may contain incomplete features and requires an explicit choice.", model=release_model)
+        release_combo.connect("notify::selected", self._release_channel_changed)
+        release_group.add(release_combo)
+        self.status_rows["release-channel-combo"] = release_combo
+        release_install = self._row("Install signed release", "Downloads a verified package, creates a restore point, then installs offline after restart.", "system-reboot-symbolic")
+        release_install.add_suffix(self._button("Download", lambda button: self._release_stage(button), suggested=True))
+        release_group.add(release_install)
+        content.append(release_group)
         return scroll
 
     def _build_hardware(self) -> Gtk.Widget:
@@ -478,6 +493,11 @@ class SystemHub(Adw.Application):
             diagnostics.handler_block_by_func(self._diagnostics_switch)
             diagnostics.set_active(value.get("diagnostics") == "enabled")
             diagnostics.handler_unblock_by_func(self._diagnostics_switch)
+        release_combo = self.status_rows.get("release-channel-combo")
+        if isinstance(release_combo, Adw.ComboRow):
+            release_combo.handler_block_by_func(self._release_channel_changed)
+            release_combo.set_selected(1 if value.get("release_channel") == "rolling" else 0)
+            release_combo.handler_unblock_by_func(self._release_channel_changed)
 
     def _render_update_status(self, value: dict[str, Any] | list[Any]) -> None:
         if not isinstance(value, dict):
@@ -512,6 +532,32 @@ class SystemHub(Adw.Application):
     def _channel_changed(self, row: Adw.ComboRow, _param: Any) -> None:
         name = "current" if row.get_selected() == 1 else "stable"
         self._run_ctl(["update", "channel", name], lambda _value: self._toast(f"{name.title()} channel selected."), privileged=True)
+
+    def _release_channel_changed(self, row: Adw.ComboRow, _param: Any) -> None:
+        name = "rolling" if row.get_selected() == 1 else "stable"
+        self._run_ctl(["release", "channel", name], lambda _value: self._toast(f"{name.title()} release track selected."), privileged=True)
+
+    def _release_check(self, button: Gtk.Button) -> None:
+        def done(value: dict[str, Any] | list[Any]) -> None:
+            if not isinstance(value, dict):
+                return
+            row = self.status_rows.get("release-status")
+            if row:
+                row.set_title(f"MythOS {value.get('version', 'release')} is available")
+                row.set_subtitle(f"Signed {value.get('channel', 'stable')} release for {value.get('architecture', 'this computer')}.")
+            self._toast("Signed MythOS release found.")
+
+        self._run_ctl(["release", "check"], done, button=button)
+
+    def _release_stage(self, button: Gtk.Button) -> None:
+        def done(value: dict[str, Any] | list[Any]) -> None:
+            message = value.get("message", "Release downloaded.") if isinstance(value, dict) else "Release downloaded."
+            self._toast(message)
+            self._refresh_status()
+            if isinstance(value, dict) and value.get("status") == "staged":
+                self._confirm("Restart and install MythOS release?", "Open apps will close. The signed release installs before the next desktop starts.", "Restart", lambda: self._launch(["systemctl", "reboot"]))
+
+        self._run_ctl(["release", "stage"], done, privileged=True, button=button)
 
     def _hardware_scan(self, button: Gtk.Button) -> None:
         def done(value: dict[str, Any] | list[Any]) -> None:

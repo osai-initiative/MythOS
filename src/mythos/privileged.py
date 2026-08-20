@@ -21,6 +21,8 @@ _ACTIONS = {
     ("recovery", "reset-settings"): "org.mythos.control.desktop-reset",
     ("preference",): "org.mythos.control.preference-set",
     ("ssh",): "org.mythos.control.remote-login",
+    ("release", "stage"): "org.mythos.control.release-stage",
+    ("release", "channel"): "org.mythos.control.release-channel",
 }
 
 
@@ -52,6 +54,10 @@ def action_for(argv: Sequence[str]) -> str:
             return _ACTIONS[("preference",)]
     if len(values) == 2 and values[0] == "ssh" and values[1] in {"enable", "disable"}:
         return _ACTIONS[("ssh",)]
+    if values == ("release", "stage"):
+        return _ACTIONS[values]
+    if len(values) == 3 and values[:2] == ("release", "channel") and values[2] in {"stable", "rolling"}:
+        return _ACTIONS[("release", "channel")]
     raise MythOSError("This privileged operation is not allowed.")
 
 

@@ -7,6 +7,9 @@ from pathlib import Path
 APP_ID = "org.mythos.SystemHub"
 VERSION = "1.0.0"
 DEFAULT_COMPATIBILITY_FEED = "https://updates.mythos.invalid/v1/compatibility.json"
+RELEASE_DISCOVERY_BASE = "https://osaii.wyvernhub.net/mythos/updates"
+RELEASE_KEYRING = "/usr/share/keyrings/mythos-release-signing.gpg"
+RELEASE_CACHE_DIR = "/var/cache/mythos/releases"
 FLATHUB_REPOSITORY = "https://flathub.org/repo/flathub.flatpakrepo"
 
 

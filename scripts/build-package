@@ -13,6 +13,7 @@ docker build --pull=false --tag "${BUILDER_IMAGE}" --file "${PROJECT_ROOT}/build
 docker run --rm \
     --env "HOST_UID=$(id -u)" \
     --env "HOST_GID=$(id -g)" \
+    --env "MYTHOS_PACKAGE_VERSION=${MYTHOS_PACKAGE_VERSION:-}" \
     --volume "${PROJECT_ROOT}:/src:ro" \
     --volume "${ARTIFACT_DIR}:/artifacts" \
     "${BUILDER_IMAGE}" \
@@ -20,6 +21,11 @@ docker run --rm \
         package_work="$(mktemp -d)"
         rsync -a --exclude=.build --exclude=.git /src/ "${package_work}/source/"
         cd "${package_work}/source"
+        if [ -n "${MYTHOS_PACKAGE_VERSION}" ]; then
+            export DEBFULLNAME="MythOS Release Automation"
+            export DEBEMAIL="releases@mythos.osaii.wyvernhub.net"
+            dch --newversion "${MYTHOS_PACKAGE_VERSION}" "Release package."
+        fi
         dpkg-buildpackage --unsigned-source --unsigned-changes --build=binary
         install -m 0644 "${package_work}"/mythos-core_*_all.deb /artifacts/
         install -m 0644 "${package_work}"/mythos_*_amd64.buildinfo /artifacts/ 2>/dev/null || true
@@ -27,4 +33,3 @@ docker run --rm \
     '
 
 printf 'Package artifacts: %s\n' "${ARTIFACT_DIR}"
-

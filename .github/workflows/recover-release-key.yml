@@ -1,0 +1,37 @@
+name: Recover encrypted MythOS release key backup
+
+on:
+  workflow_dispatch:
+    inputs:
+      recipient_public_key:
+        description: ASCII-armored OpenPGP public key to receive the encrypted backup
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  recover:
+    runs-on: ubuntu-24.04
+    environment: release-signing
+    steps:
+      - name: Export only to the approved recovery recipient
+        env:
+          RELEASE_KEY: ${{ secrets.MYTHOS_RELEASE_SIGNING_KEY }}
+          RECIPIENT_PUBLIC_KEY: ${{ inputs.recipient_public_key }}
+        run: |
+          set -euo pipefail
+          umask 077
+          signing_home="$(mktemp -d)"
+          recipient_home="$(mktemp -d)"
+          printf '%s' "$RELEASE_KEY" | gpg --homedir "$signing_home" --batch --import
+          printf '%s' "$RECIPIENT_PUBLIC_KEY" | gpg --homedir "$recipient_home" --batch --import
+          recipient="$(gpg --homedir "$recipient_home" --batch --with-colons --list-keys | awk -F: '$1=="fpr" {print $10; exit}')"
+          test -n "$recipient"
+          gpg --homedir "$signing_home" --batch --armor --export-secret-keys 5B32D10C7AFD29113A8023E4FA97765702948BA8 | gpg --homedir "$recipient_home" --batch --yes --armor --trust-model always --encrypt --recipient "$recipient" --output mythos-release-signing-backup.asc
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mythos-release-signing-backup
+          path: mythos-release-signing-backup.asc
+          retention-days: 1

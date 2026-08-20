@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+KEYRING=/usr/share/keyrings/mythos-release-signing.gpg
+EXPECTED_KEY_FINGERPRINT=5B32D10C7AFD29113A8023E4FA97765702948BA8
+ALLOW_WITHOUT_SNAPSHOT=0
+ASSUME_YES=0
+
+usage() {
+    printf '%s\n' 'Usage: install-mythos-in-place [--yes] [--allow-without-snapshot]'
+}
+while (($#)); do
+    case "$1" in
+        --yes) ASSUME_YES=1 ;;
+        --allow-without-snapshot) ALLOW_WITHOUT_SNAPSHOT=1 ;;
+        --help|-h) usage; exit 0 ;;
+        *) printf 'Unknown option: %s\n' "$1" >&2; usage >&2; exit 2 ;;
+    esac
+    shift
+done
+
+if (( EUID != 0 )); then printf 'Run this release installer as root.\n' >&2; exit 1; fi
+if [[ -e /run/live/medium ]]; then printf 'This installer updates an installed MythOS system, not a live session.\n' >&2; exit 1; fi
+if [[ ! -r /etc/os-release ]] || ! grep -qx 'ID=mythos' /etc/os-release; then printf 'Refusing to update a non-MythOS system.\n' >&2; exit 1; fi
+if [[ -L /system-update ]]; then printf 'Finish or cancel the pending offline update first.\n' >&2; exit 1; fi
+if [[ ! -r "${KEYRING}" ]]; then
+    KEYRING="${SCRIPT_DIR}/mythos-release-signing.gpg"
+fi
+if [[ ! -r "${KEYRING}" ]]; then printf 'The MythOS release signing key is unavailable.\n' >&2; exit 1; fi
+key_fingerprint="$(gpg --batch --with-colons --show-keys "${KEYRING}" | awk -F: '$1=="fpr" {print $10; exit}')"
+if [[ "${key_fingerprint}" != "${EXPECTED_KEY_FINGERPRINT}" ]]; then
+    printf 'The MythOS release signing key does not match the published fingerprint.\n' >&2
+    exit 1
+fi
+
+manifest="${SCRIPT_DIR}/mythos-release.json"
+signature="${manifest}.asc"
+[[ -f "${manifest}" && -f "${signature}" ]] || { printf 'Signed release metadata is missing.\n' >&2; exit 1; }
+gpgv --keyring "${KEYRING}" "${signature}" "${manifest}"
+
+mapfile -t packages < <(find "${SCRIPT_DIR}" -maxdepth 1 -type f -name 'mythos-core_*.deb' -print | sort)
+if (( ${#packages[@]} != 1 )); then printf 'Expected exactly one MythOS package beside this installer.\n' >&2; exit 1; fi
+python3 - "${manifest}" "${packages[0]}" <<'PY'
+import hashlib
+import json
+import os
+import sys
+
+manifest, package = sys.argv[1:]
+value = json.load(open(manifest, encoding="utf-8"))
+for artifact in value.get("artifacts", []):
+    if artifact.get("kind") == "deb" and artifact.get("name") == os.path.basename(package):
+        if hashlib.sha256(open(package, "rb").read()).hexdigest() == artifact.get("sha256"):
+            raise SystemExit(0)
+raise SystemExit("package does not match the signed release manifest")
+PY
+
+if command -v snapper >/dev/null 2>&1 && [[ "$(findmnt -nro FSTYPE --target / 2>/dev/null || true)" == btrfs ]]; then
+    snapper -c root create --print-number --type pre --cleanup-algorithm number --userdata important=yes --description 'MythOS pre-release update' >/dev/null
+elif (( ! ALLOW_WITHOUT_SNAPSHOT )); then
+    printf 'A Btrfs Snapper snapshot is unavailable; use --allow-without-snapshot only with an independent backup.\n' >&2
+    exit 1
+fi
+
+if (( ! ASSUME_YES )); then
+    read -r -p "Install signed MythOS release in place? [y/N] " response
+    [[ "${response}" =~ ^[Yy]([Ee][Ss])?$ ]] || exit 0
+fi
+apt-get install --yes --no-remove -o Dpkg::Options::=--force-confold "${packages[0]}"
+python3 -m mythos.upgrade --post-install
+printf 'Signed MythOS release update installed in place.\n'
