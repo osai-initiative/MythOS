@@ -16,6 +16,8 @@ mythosctl = "mythos.cli:main"
 mythos-welcome = "mythos.welcome:main"
 mythos-migrate = "mythos.migrate_gui:main"
 mythos-open = "mythos.open_app:main"
+mythos-privileged = "mythos.privileged_client:main"
+mythos-privileged-service = "mythos.privileged_service:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

@@ -306,7 +306,7 @@ class Welcome(Adw.Application):
 
         def worker() -> None:
             result = subprocess.run(
-                ["pkexec", "mythosctl", "--compact", "feature", "enable", feature],
+                ["mythos-privileged", "--compact", "feature", "enable", feature],
                 capture_output=True,
                 text=True,
                 check=False,

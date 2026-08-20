@@ -1,4 +1,6 @@
 data/applications/* usr/share/applications/
+data/dbus/* etc/dbus-1/system.d/
+data/dbus-services/* usr/share/dbus-1/system-services/
 data/mimeapps.list usr/share/applications/
 data/autostart/* etc/xdg/autostart/
 data/calamares/* etc/calamares/

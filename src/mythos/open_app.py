@@ -170,7 +170,7 @@ class OpenApplication(Adw.Application):
     def _install_windows(self) -> None:
         try:
             Gio.Subprocess.new(
-                ["pkexec", "mythosctl", "feature", "enable", "windows-apps"],
+                ["mythos-privileged", "feature", "enable", "windows-apps"],
                 Gio.SubprocessFlags.NONE,
             )
         except GLib.Error as exc:
@@ -238,4 +238,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

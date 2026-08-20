@@ -423,7 +423,7 @@ class SystemHub(Adw.Application):
     ) -> None:
         if button:
             button.set_sensitive(False)
-        command = (["pkexec"] if privileged else []) + ["mythosctl", "--compact", *argv]
+        command = (["mythos-privileged"] if privileged else ["mythosctl"]) + ["--compact", *argv]
 
         def worker() -> None:
             try:
